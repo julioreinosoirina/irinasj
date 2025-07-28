@@ -17,7 +17,7 @@
   <meta name="apple-mobile-web-app-title" content="IRINA">
   <link rel="apple-touch-icon" href="/icon-192x192.png">
 
-  <!-- Enlace directo al logo (público) -->
+  <!-- Enlace directo al logo -->
   <link rel="preload" href="https://lh3.googleusercontent.com/d/1ruT1ZP3aWG8Yuh2OanyP0sbMMqcHyJJG=view?usp=sharing" as="image">
 
   <!-- Tailwind CSS -->
@@ -117,7 +117,7 @@
       z-index: 10;
     }
 
-    /* Mensaje de instalación */
+    /* Banner de instalación */
     .install-banner {
       position: fixed;
       top: 0;
@@ -129,8 +129,11 @@
       text-align: center;
       font-size: 0.9rem;
       z-index: 100;
-      display: none;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .install-banner button {
@@ -140,16 +143,20 @@
       padding: 0.5rem 1rem;
       border-radius: 0.5rem;
       font-weight: 600;
-      margin-left: 1rem;
       cursor: pointer;
+    }
+
+    .install-banner .hidden {
+      display: none;
     }
   </style>
 </head>
 <body class="min-h-screen gradient-bg flex items-center justify-center p-4">
   <!-- Banner de instalación -->
-  <div id="installBanner" class="install-banner">
-    ¿Quieres instalar IRINA?
+  <div id="installBanner" class="install-banner hidden">
+    <span>¿Quieres instalar IRINA?</span>
     <button id="installButton">Instalar</button>
+    <button id="closeBanner" class="text-sm">×</button>
   </div>
 
   <div class="absolute inset-0 overflow-hidden pointer-events-none">
@@ -158,7 +165,6 @@
   </div>
 
   <div class="relative z-10 text-center max-w-md w-full px-4">
-    <!-- Logo -->
     <div class="logo-container">
       <img 
         src="https://lh3.googleusercontent.com/d/1ruT1ZP3aWG8Yuh2OanyP0sbMMqcHyJJG=view?usp=sharing" 
@@ -168,7 +174,6 @@
       >
     </div>
     
-    <!-- Título -->
     <div class="title-section">
       <h1 class="text-4xl md:text-5xl font-bold text-indigo-800 mb-2 tracking-tight">
         IRINA
@@ -178,7 +183,6 @@
       </p>
     </div>
 
-    <!-- Botón principal -->
     <button 
       id="startButton"
       class="w-full max-w-xs mx-auto bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg transition-all duration-300 button-hover flex items-center justify-center space-x-3"
@@ -196,26 +200,70 @@
   </div>
 
   <script>
-    // Variables para instalación
     let deferredPrompt;
 
-    // Mostrar banner de instalación
+    // Mostrar banner si el evento beforeinstallprompt se dispara
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      document.getElementById('installBanner').style.display = 'block';
+      console.log('Evento beforeinstallprompt capturado');
+      showInstallBanner();
     });
+
+    // Verificar si ya se instaló la app
+    window.addEventListener('appinstalled', () => {
+      console.log('App instalada');
+      hideInstallBanner();
+      localStorage.setItem('pwaInstalled', 'true');
+      deferredPrompt = null;
+    });
+
+    // Mostrar el banner si no se ha instalado y hay evento disponible
+    function showInstallBanner() {
+      if (localStorage.getItem('pwaInstalled') === 'true') return;
+      if (localStorage.getItem('pwaBannerClosed') === 'true') return;
+      if (!deferredPrompt) return;
+
+      document.getElementById('installBanner').classList.remove('hidden');
+    }
+
+    function hideInstallBanner() {
+      document.getElementById('installBanner').classList.add('hidden');
+    }
 
     // Botón de instalación
     document.getElementById('installButton').addEventListener('click', () => {
       if (deferredPrompt) {
         deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(() => {
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('Usuario aceptó la instalación');
+            localStorage.setItem('pwaInstalled', 'true');
+          } else {
+            console.log('Usuario rechazó la instalación');
+          }
           deferredPrompt = null;
-          document.getElementById('installBanner').style.display = 'none';
+          hideInstallBanner();
         });
       }
     });
+
+    // Cerrar el banner (pero no bloquear para siempre)
+    document.getElementById('closeBanner').addEventListener('click', () => {
+      document.getElementById('installBanner').classList.add('hidden');
+      // No guardamos en localStorage para que pueda volver a aparecer
+    });
+
+    // Mostrar banner manualmente si no se ha instalado (después de 5 segundos)
+    setTimeout(() => {
+      if (!window.matchMedia('(display-mode: standalone)').matches) {
+        if (localStorage.getItem('pwaInstalled') !== 'true') {
+          if (document.getElementById('installBanner').classList.contains('hidden')) {
+            showInstallBanner();
+          }
+        }
+      }
+    }, 5000);
 
     // Registrar Service Worker
     if ('serviceWorker' in navigator) {
@@ -229,8 +277,6 @@
     // Acción del botón principal
     document.getElementById('startButton').addEventListener('click', function() {
       const scriptURL = 'https://script.google.com/a/macros/institutoirina.com/s/AKfycbxpCrGi9nJdZnmz7BnWisyVt4YuvKj3oCF6Wz2xglLtP1cFW4ZaOZpxbKtUwluKcD-5/exec';
-      
-      // Abre en nueva pestaña (más seguro para PWAs)
       window.open(scriptURL, '_blank');
     });
     
