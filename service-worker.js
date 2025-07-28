@@ -7,5 +7,6 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // Solo permite la app shell
   event.respondWith(fetch(event.request));
 });

@@ -1,7 +1,7 @@
 {
   "name": "IRINA - Instituto de Rehabilitación Integral",
   "short_name": "IRINA",
-  "description": "Experiencia interactiva del Instituto de Rehabilitación Integral",
+  "description": "Sistema interactivo del Instituto de Rehabilitación Integral",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",

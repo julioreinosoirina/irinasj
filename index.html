@@ -6,25 +6,23 @@
   <meta name="theme-color" content="#4F46E5" />
   <meta name="description" content="Sistema interactivo del Instituto de Rehabilitación Integral (IRINA)" />
   
-  <!-- Títulos -->
   <title>IRINA - Instituto de Rehabilitación Integral</title>
-  
+
   <!-- Web App Manifest -->
   <link rel="manifest" href="/manifest.json">
   
-  <!-- Soporte para iOS (iPhone) -->
+  <!-- Soporte para iOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="IRINA">
   <link rel="apple-touch-icon" href="/icon-192x192.png">
 
-  <!-- Preload del logo para mejor carga -->
-  <link rel="preload" href="https://lh3.googleusercontent.com/d/1ruT1ZP3aWG8Yuh2OanyP0sbMMqcHyJJG" as="image">
+  <!-- Enlace directo al logo (público) -->
+  <link rel="preload" href="https://lh3.googleusercontent.com/d/1ruT1ZP3aWG8Yuh2OanyP0sbMMqcHyJJG=view?usp=sharing" as="image">
 
-  <!-- Tailwind CSS CDN -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Configuración Tailwind -->
   <script>
     tailwind.config = {
       theme: {
@@ -38,7 +36,6 @@
     }
   </script>
   
-  <!-- Estilos personalizados -->
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     
@@ -47,6 +44,8 @@
       margin: 0;
       padding: 0;
       background: #f0f9ff;
+      height: 100vh;
+      overflow: hidden;
     }
     
     .gradient-bg {
@@ -92,7 +91,7 @@
       height: 85%;
       object-fit: contain;
       opacity: 0;
-      transition: all 0.5s ease;
+      transition: opacity 0.5s ease;
     }
     
     .title-section {
@@ -117,19 +116,52 @@
       backdrop-filter: blur(5px);
       z-index: 10;
     }
+
+    /* Mensaje de instalación */
+    .install-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #4F46E5;
+      color: white;
+      padding: 0.75rem;
+      text-align: center;
+      font-size: 0.9rem;
+      z-index: 100;
+      display: none;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .install-banner button {
+      background: white;
+      color: #4F46E5;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      margin-left: 1rem;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body class="min-h-screen gradient-bg flex items-center justify-center p-4">
+  <!-- Banner de instalación -->
+  <div id="installBanner" class="install-banner">
+    ¿Quieres instalar IRINA?
+    <button id="installButton">Instalar</button>
+  </div>
+
   <div class="absolute inset-0 overflow-hidden pointer-events-none">
     <div class="absolute -top-20 -right-20 w-40 h-40 bg-indigo-100 rounded-full blur-xl opacity-70 pulse-animation"></div>
     <div class="absolute -bottom-20 -left-20 w-40 h-40 bg-purple-100 rounded-full blur-xl opacity-70 pulse-animation" style="animation-delay: 1s;"></div>
   </div>
 
   <div class="relative z-10 text-center max-w-md w-full px-4">
-    <!-- Logo Institucional -->
+    <!-- Logo -->
     <div class="logo-container">
       <img 
-        src="https://lh3.googleusercontent.com/d/1ruT1ZP3aWG8Yuh2OanyP0sbMMqcHyJJG" 
+        src="https://lh3.googleusercontent.com/d/1ruT1ZP3aWG8Yuh2OanyP0sbMMqcHyJJG=view?usp=sharing" 
         alt="Logo IRINA" 
         class="logo-img"
         onerror="this.src='/icon-192x192.png'; this.style.opacity = 1;"
@@ -142,26 +174,20 @@
         IRINA
       </h1>
       <p class="text-lg text-gray-700 font-medium">
-        Instituto de Rehabilitación Integral 
+        Instituto de Rehabilitación Integral
       </p>
     </div>
 
-    <!-- Botón de inicio -->
+    <!-- Botón principal -->
     <button 
       id="startButton"
-      class="w-full max-w-xs mx-auto bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg transition-all duration-300 button-hover disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center space-x-3"
+      class="w-full max-w-xs mx-auto bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg transition-all duration-300 button-hover flex items-center justify-center space-x-3"
     >
-      <svg id="loadingSpinner" class="hidden h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-      <span id="buttonText">Iniciar Sistema</span>
+      <span>Acceder al Sistema</span>
     </button>
 
-    <!-- Mensaje de instrucciones -->
     <p class="mt-8 text-sm text-gray-600 leading-relaxed">
-      Haz clic en el botón para comenzar la experiencia interactiva. 
-      Serás redirigido al sistema de la institución.
+      Haz clic para iniciar sesión y acceder al sistema de la institución.
     </p>
   </div>
 
@@ -170,6 +196,27 @@
   </div>
 
   <script>
+    // Variables para instalación
+    let deferredPrompt;
+
+    // Mostrar banner de instalación
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('installBanner').style.display = 'block';
+    });
+
+    // Botón de instalación
+    document.getElementById('installButton').addEventListener('click', () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          deferredPrompt = null;
+          document.getElementById('installBanner').style.display = 'none';
+        });
+      }
+    });
+
     // Registrar Service Worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -179,39 +226,15 @@
       });
     }
 
-    // Manejo del botón
+    // Acción del botón principal
     document.getElementById('startButton').addEventListener('click', function() {
-      const button = this;
-      const spinner = document.getElementById('loadingSpinner');
-      const text = document.getElementById('buttonText');
-      
-      button.disabled = true;
-      spinner.classList.remove('hidden');
-      text.textContent = 'Accediendo al sistema...';
-      
-      // URL de Google Apps Script (limpia)
       const scriptURL = 'https://script.google.com/a/macros/institutoirina.com/s/AKfycbxpCrGi9nJdZnmz7BnWisyVt4YuvKj3oCF6Wz2xglLtP1cFW4ZaOZpxbKtUwluKcD-5/exec';
       
-      try {
-        window.location.href = scriptURL;
-        
-        setTimeout(() => {
-          window.open(scriptURL, '_blank');
-        }, 1000);
-        
-      } catch (error) {
-        console.error('Error:', error);
-        window.open(scriptURL, '_blank');
-      } finally {
-        setTimeout(() => {
-          button.disabled = false;
-          spinner.classList.add('hidden');
-          text.textContent = 'Iniciar Sistema';
-        }, 3000);
-      }
+      // Abre en nueva pestaña (más seguro para PWAs)
+      window.open(scriptURL, '_blank');
     });
     
-    // Efecto de carga para la imagen
+    // Carga del logo
     document.querySelector('.logo-img').addEventListener('load', function() {
       this.style.opacity = 1;
     });
