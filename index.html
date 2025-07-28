@@ -117,47 +117,55 @@
       z-index: 10;
     }
 
-    /* Banner de instalación */
-    .install-banner {
+    /* Modal de instalación */
+    .install-modal {
+      display: none;
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      background: #4F46E5;
-      color: white;
-      padding: 0.75rem;
-      text-align: center;
-      font-size: 0.9rem;
-      z-index: 100;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      display: flex;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 200;
       justify-content: center;
       align-items: center;
-      gap: 0.5rem;
     }
 
-    .install-banner button {
+    .install-modal-content {
       background: white;
-      color: #4F46E5;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 0.5rem;
-      font-weight: 600;
-      cursor: pointer;
+      border-radius: 16px;
+      padding: 1.5rem;
+      max-width: 90vw;
+      width: 400px;
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
     }
 
-    .install-banner .hidden {
-      display: none;
+    .install-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #999;
+    }
+
+    .install-instructions img {
+      max-width: 100%;
+      margin: 1rem 0;
+      border-radius: 8px;
+      border: 1px solid #ddd;
     }
   </style>
 </head>
 <body class="min-h-screen gradient-bg flex items-center justify-center p-4">
-  <!-- Banner de instalación -->
-  <div id="installBanner" class="install-banner hidden">
-    <span>¿Quieres instalar IRINA?</span>
-    <button id="installButton">Instalar</button>
-    <button id="closeBanner" class="text-sm">×</button>
-  </div>
+  <!-- Botón de instalación (siempre visible) -->
+  <button 
+    id="showInstallButton"
+    class="fixed top-4 right-4 bg-white text-indigo-700 font-semibold py-2 px-4 rounded-full shadow-lg z-50 hover:bg-gray-100 transition"
+    title="Instalar IRINA"
+  >
+    📲
+  </button>
 
   <div class="absolute inset-0 overflow-hidden pointer-events-none">
     <div class="absolute -top-20 -right-20 w-40 h-40 bg-indigo-100 rounded-full blur-xl opacity-70 pulse-animation"></div>
@@ -199,71 +207,53 @@
     © 2025 IRINA - Todos los derechos reservados
   </div>
 
+  <!-- Modal de instalación -->
+  <div id="installModal" class="install-modal">
+    <div class="install-modal-content">
+      <span class="install-close" id="closeModal">×</span>
+      <h2 class="text-xl font-bold text-gray-800 mb-4">Instalar IRINA</h2>
+      <div class="install-instructions">
+        <p class="mb-3 text-gray-700">Agrega IRINA a tu pantalla de inicio para acceder como una app.</p>
+        
+        <div id="instructions-android" class="mb-4">
+          <strong>Android (Chrome):</strong>
+          <ol class="list-decimal list-inside mt-2 text-sm text-gray-600">
+            <li>Toca el ícono <strong>☰</strong> (menú)</li>
+            <li>Selecciona <strong>"Instalar aplicación"</strong></li>
+            <li>Confirma y listo</li>
+          </ol>
+          <img src="https://developer.android.com/static/images/codelabs/pwa-install-prompt-chrome-android.png" alt="Android install">
+        </div>
+
+        <div id="instructions-ios" class="mb-4">
+          <strong>iOS (Safari):</strong>
+          <ol class="list-decimal list-inside mt-2 text-sm text-gray-600">
+            <li>Toca el ícono de <strong>compartir</strong></li>
+            <li>Busca <strong>"Agregar a la pantalla de inicio"</strong></li>
+            <li>Listo</li>
+          </ol>
+          <img src="https://help.apple.com/assets/61C3B1A726C8A899D7A9B8A5/61C3B1A926C8A899D7A9B8A8/es_MX/3c3e5d2c1f0e49a4b8f6b9c4f7c7d5a8.png" alt="iOS install">
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
-    let deferredPrompt;
-
-    // Mostrar banner si el evento beforeinstallprompt se dispara
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      console.log('Evento beforeinstallprompt capturado');
-      showInstallBanner();
+    // Mostrar modal de instalación
+    document.getElementById('showInstallButton').addEventListener('click', () => {
+      document.getElementById('installModal').style.display = 'flex';
     });
 
-    // Verificar si ya se instaló la app
-    window.addEventListener('appinstalled', () => {
-      console.log('App instalada');
-      hideInstallBanner();
-      localStorage.setItem('pwaInstalled', 'true');
-      deferredPrompt = null;
+    document.getElementById('closeModal').addEventListener('click', () => {
+      document.getElementById('installModal').style.display = 'none';
     });
 
-    // Mostrar el banner si no se ha instalado y hay evento disponible
-    function showInstallBanner() {
-      if (localStorage.getItem('pwaInstalled') === 'true') return;
-      if (localStorage.getItem('pwaBannerClosed') === 'true') return;
-      if (!deferredPrompt) return;
-
-      document.getElementById('installBanner').classList.remove('hidden');
-    }
-
-    function hideInstallBanner() {
-      document.getElementById('installBanner').classList.add('hidden');
-    }
-
-    // Botón de instalación
-    document.getElementById('installButton').addEventListener('click', () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('Usuario aceptó la instalación');
-            localStorage.setItem('pwaInstalled', 'true');
-          } else {
-            console.log('Usuario rechazó la instalación');
-          }
-          deferredPrompt = null;
-          hideInstallBanner();
-        });
+    // Cerrar al hacer clic fuera
+    document.getElementById('installModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('installModal')) {
+        document.getElementById('installModal').style.display = 'none';
       }
     });
-
-    // Cerrar el banner (pero no bloquear para siempre)
-    document.getElementById('closeBanner').addEventListener('click', () => {
-      document.getElementById('installBanner').classList.add('hidden');
-      // No guardamos en localStorage para que pueda volver a aparecer
-    });
-
-    // Mostrar banner manualmente si no se ha instalado (después de 5 segundos)
-    setTimeout(() => {
-      if (!window.matchMedia('(display-mode: standalone)').matches) {
-        if (localStorage.getItem('pwaInstalled') !== 'true') {
-          if (document.getElementById('installBanner').classList.contains('hidden')) {
-            showInstallBanner();
-          }
-        }
-      }
-    }, 5000);
 
     // Registrar Service Worker
     if ('serviceWorker' in navigator) {
